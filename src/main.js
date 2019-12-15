@@ -1,8 +1,15 @@
 import Vue from 'vue'
+import router from '@/router'
 import App from './App.vue'
-
+import vConsole from 'vconsole' // eslint-disable-line
+import plugin from '@/vant.global.plugin' // eslint-disable-line
+import reset from '@/assets/reset.scss' // eslint-disable-line
 Vue.config.productionTip = false
 
+new vConsole()
+
 new Vue({
-  render: h => h(App),
-}).$mount('#app')
+  el: "#app",
+  router,
+  render: h => h(App)
+})
