@@ -24,9 +24,9 @@
         <van-field label="单位" v-model="listValue.unit" placeholder="请输入" />
         <van-field label="联系电话" type="tel" v-model="listValue.phone" placeholder="请输入" />
         <van-field label="联系地址" v-model="listValue.address" placeholder="请输入" />
-        <van-field label="发票" v-model="listValue.bill" placeholder="请输入" />
-        <van-field label="税号" v-model="listValue.utyParagraph" placeholder="请输入" />
-        <van-field v-model="listValue.remark" rows="2" autosize label="备注" type="textarea" maxlength="200" placeholder="请输入留言" show-word-limit />
+        <van-field label="发票" v-model="listValue.bill" placeholder="选填" />
+        <van-field label="税号" v-model="listValue.utyParagraph" placeholder="选填" />
+        <van-field v-model="listValue.remark" rows="2" autosize label="备注" type="textarea" maxlength="200" placeholder="选填,请输入留言" show-word-limit />
       </van-cell-group>
     </div>
     <van-submit-bar
@@ -43,6 +43,7 @@
 import { Button, Panel, Divider, Field, Cell, CellGroup, SubmitBar, AddressEdit } from 'vant'
 import Validate from '@/utils/validator'
 import { submitDonateBill, paybill, getDonatesInfo, getDonateTotal } from '@/api/donate'
+import { getUrlParams } from '@/utils/util'
 export default {
   name: 'Donate',
   components: {
@@ -82,6 +83,10 @@ export default {
     }
   },
   mounted() {
+    const { code } = getUrlParams('code')
+    if(!code) {
+      // window.location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=REDIRECT_URI&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect` //若提示“该链接无法访问”，请检查参数是否填写错误，是否拥有scope参数对应的授权作用域权限。
+    }
     // getSomething()
     this.$nextTick(() => {
       this.requestAnimationID = window.requestAnimationFrame(this.textScrollAnimation)
