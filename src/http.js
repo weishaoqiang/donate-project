@@ -1,6 +1,7 @@
 import axios from 'axios'
+import { APIURL } from '@/global.config'
 
-axios.defaults.baseURL = 'https://api.example.com';
+axios.defaults.baseURL = APIURL;
 axios.defaults.headers.common['Authorization'] = 'AUTH_TOKEN';
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 // 添加请求拦截器

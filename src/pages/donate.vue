@@ -44,6 +44,7 @@ import { Button, Panel, Divider, Field, Cell, CellGroup, SubmitBar, AddressEdit 
 import Validate from '@/utils/validator'
 import { submitDonateBill, paybill, getDonatesInfo, getDonateTotal } from '@/api/donate'
 import { getUrlParams } from '@/utils/util'
+import { AppId, APPURL, APIURL } from '@/global.config'
 export default {
   name: 'Donate',
   components: {
@@ -58,7 +59,7 @@ export default {
   },
   data() {
     return {
-      totalDonatemoney: 0,
+      totalDonatemoney: 0, // 捐赠总额
       listValue: {
         donatemoney: '',
         name: '',
@@ -69,6 +70,7 @@ export default {
         utyParagraph: '',
         remark: ''
       },
+      code: '',
       left: 0,
       requestAnimationID: null,
       rules: {
@@ -83,11 +85,14 @@ export default {
     }
   },
   mounted() {
-    const { code } = getUrlParams('code')
+    const pageUrl = window.location.href
+    const SCOPE = 'snsapi_base'
+    const code = getUrlParams('code')
     if(!code) {
-      // window.location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=REDIRECT_URI&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect` //若提示“该链接无法访问”，请检查参数是否填写错误，是否拥有scope参数对应的授权作用域权限。
+      window.location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${APPID}&redirect_uri=${pageUrl}&response_type=code&scope=${SCOPE}&state=STATE#wechat_redirect` //若提示“该链接无法访问”，请检查参数是否填写错误，是否拥有scope参数对应的授权作用域权限。
+    } else {
+      this.code = code
     }
-    // getSomething()
     this.$nextTick(() => {
       this.requestAnimationID = window.requestAnimationFrame(this.textScrollAnimation)
     })
