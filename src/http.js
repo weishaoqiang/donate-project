@@ -1,5 +1,8 @@
 import axios from 'axios'
+import Vue from 'vue'
 import { APIURL } from '@/global.config'
+
+const Toast = Vue.prototype.$toast
 
 axios.defaults.baseURL = APIURL;
 axios.defaults.headers.common['Authorization'] = 'AUTH_TOKEN';

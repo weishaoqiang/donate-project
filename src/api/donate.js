@@ -1,5 +1,8 @@
 import http from '@/http'
 
+// 获取openId
+export const getOpenId = params => http.get('getOpenId', { params })
+
 // 获取捐款总数解救
 export const getDonateTotal = params => http.get('someApi', { params })
 

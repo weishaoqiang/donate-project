@@ -1,8 +1,5 @@
 <template>
   <div class="container">
-    <!-- <div class="scroll-content" ref="scrollBox">
-      <p class="text" :style="{'left': `${left}px`}" ref="scrollText">滚动文字滚动文字滚动文字滚动fkdlkfldkfldfkldfkdddddddlfdlfldfklvmlkdfmvldkmfvdlfndkjcnkdncksdnckdsncksdncksdnckdscnkdnckdsnckdscnkdncjkdsnckdsckeufierhiuiernvckdncksdcnkdscnksdnckwjoecmlsmcldmclkmsdvldfnvld文字滚滚动文字滚动文字滚动文字滚动fkdlkfldkfldfkldfkdddddddlfdlfldfklvmlkdfmvldkmfvdlfndkjcnkdncksdnckdsncksdncksdnckdscnkdnckdsnckdscnkdncjkdsnckdsckeufierhiuiernvckdncksdcnkdscnksdnckwjoecmlsmcldmclkmsdvldfnvld文字滚滚动文字滚动文字滚动文字滚动fkdlkfldkfldfkldfkdddddddlfdlfldfklvmlkdfmvldkmfvdlfndkjcnkdncksdnckdsncksdncksdnckdscnkdnckdsnckdscnkdncjkdsnckdsckeufierhiuiernvckdncksdcnkdscnksdnckwjoecmlsmcldmclkmsdvldfnvld文字滚滚动文字滚动文字滚动文字滚动fkdlkfldkfldfkldfkdddddddlfdlfldfklvmlkdfmvldkmfvdlfndkjcnkdncksdnckdsncksdncksdnckdscnkdnckdsnckdscnkdncjkdsnckdsckeufierhiuiernvckdncksdcnkdscnksdnckwjoecmlsmcldmclkmsdvldfnvld文字滚</p>
-    </div> -->
     <div class="header-panel">
       <div class="logo">
         <img src="@/assets/image/logo.jpeg" alt="">
@@ -42,7 +39,7 @@
 <script>
 import { Button, Panel, Divider, Field, Cell, CellGroup, SubmitBar, AddressEdit } from 'vant'
 import Validate from '@/utils/validator'
-import { submitDonateBill, paybill, getDonatesInfo, getDonateTotal } from '@/api/donate'
+import { getOpenId, submitDonateBill, paybill, getDonatesInfo, getDonateTotal } from '@/api/donate'
 import { getUrlParams } from '@/utils/util'
 import { AppId, APPURL, APIURL } from '@/global.config'
 export default {
@@ -70,7 +67,7 @@ export default {
         utyParagraph: '',
         remark: ''
       },
-      code: '',
+      code: '061EeHrI1XACg40YvOtI1XkTrI1EeHr7',
       left: 0,
       requestAnimationID: null,
       rules: {
@@ -87,11 +84,15 @@ export default {
   mounted() {
     const pageUrl = window.location.href
     const SCOPE = 'snsapi_base'
-    const code = getUrlParams('code')
+    const code = getUrlParams('code') || this.code
     if(!code) {
-      window.location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${APPID}&redirect_uri=${pageUrl}&response_type=code&scope=${SCOPE}&state=STATE#wechat_redirect` //若提示“该链接无法访问”，请检查参数是否填写错误，是否拥有scope参数对应的授权作用域权限。
+      // window.location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${AppId}&redirect_uri=${encodeURIComponent(pageUrl)}&response_type=code&scope=${SCOPE}&state=123#wechat_redirect` //若提示“该链接无法访问”，请检查参数是否填写错误，是否拥有scope参数对应的授权作用域权限。
     } else {
       this.code = code
+      console.log('code:' + this.code)
+      getOpenId({ code: this.code }).then(res => {
+        console.log(res)
+      })
     }
     this.$nextTick(() => {
       this.requestAnimationID = window.requestAnimationFrame(this.textScrollAnimation)
@@ -124,11 +125,11 @@ export default {
       window.requestAnimationFrame(this.textScrollAnimation)
     },
     async getDonateTotal() {
-      const totalDonate = await getDonateTotal()
-      console.log(totalDonate)
+      const  donateTotal = await getDonateTotal()
+      console.log(donateTotal)
     },
     async getDonatesInfo() {
-      const donatesInfo = await getDonateTotal()
+      const donatesInfo = await getDonatesInfo()
       console.log(donatesInfo)
     },
     validate() {
@@ -142,25 +143,24 @@ export default {
        * 3. 调起微信支付
        */
       this.validate().then(async res => {
-        console.log('发起捐赠')
         const { billId } = await submitDonateBill(this.listValue)
+        const openId = await getOpenId({ code: this.code })
         const { timeStamp, nonceStr, signType, paySign } = await paybill({ billId })
-          // WeixinJSBridge.invoke('getBrandWCPayRequest', {
-          //   "appId": timeStamp, //公众号名称，由商户传入     
-          //   "timeStamp": timeStamp, //时间戳，自1970年以来的秒数     
-          //   "nonceStr": nonceStr, //随机串     
-          //   // "package": package,
-          //   "signType":"MD5", //微信签名方式：     
-          //   "paySign": paySign //微信签名 
-          // },
-          // function(res){
-          //   if(res.err_msg == "get_brand_wcpay_request:ok" ) {
-          //     // 使用以上方式判断前端返回,微信团队郑重提示：
-          //     //res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
-          //   }
-          // })
+          WeixinJSBridge.invoke('getBrandWCPayRequest', { // eslint-disable-line no-undef
+            "appId": timeStamp, //公众号名称，由商户传入     
+            "timeStamp": timeStamp, //时间戳，自1970年以来的秒数     
+            "nonceStr": nonceStr, //随机串     
+            // "package": package,
+            "signType":"MD5", //微信签名方式：     
+            "paySign": paySign //微信签名 
+          },
+          function(res){
+            if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+              // 使用以上方式判断前端返回,微信团队郑重提示：
+              //res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
+            }
+          })
         }).catch(err => {
-        console.log([...err][0])
         this.$notify([...err][0])
       })
     }
